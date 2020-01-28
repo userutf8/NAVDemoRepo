@@ -2,8 +2,8 @@ table 50101 Contragent
 {
     Caption = 'Contragent';
     DataCaptionFields = "No.";
-    Permissions = TableData "Vendor" = rm,
-                  tableData "Customer" = rm;
+    Permissions = TableData "Vendor" = r,
+                  tableData "Customer" = r;
 
     fields
     {
@@ -14,20 +14,18 @@ table 50101 Contragent
             var
                 Contragent: Record Contragent;
             begin
-                If "No." <> 0 then begin
-                    Contragent.Reset();
+                Contragent.Reset();
+                If "No." = 0 then begin
+                    Contragent.SetCurrentKey("No.");
+                    if Contragent.FindLast() then
+                        "No." := Contragent."No." + 1
+                    else
+                        "No." := 1;
+                end else begin
                     Contragent.SetRange("No.", "No.");
                     if not Contragent.IsEmpty then
                         Error(RecordAlreadyExistsErr, TableCaption, Contragent.FieldName("No."), "No.");
-                    exit;
                 end;
-
-                Contragent.Reset();
-                Contragent.SetCurrentKey("No.");
-                if Contragent.FindLast() then
-                    "No." := Contragent."No." + 1
-                else
-                    "No." := 1;
             end;
         }
         field(2; CustomerNo; Code[20])
@@ -35,13 +33,8 @@ table 50101 Contragent
             Caption = 'Customer No.';
             TableRelation = Customer;
             trigger OnValidate()
-            var
-                Contragent: Record Contragent;
             begin
-                Contragent.Reset();
-                Contragent.SetRange(CustomerNo, CustomerNo);
-                if not Contragent.IsEmpty then
-                    Error(RecordAlreadyExistsErr, TableCaption, Contragent.FieldName(CustomerNo), Contragent.CustomerNo);
+                CheckRecWithCustExists(CustomerNo);
             end;
         }
         field(3; VendorNo; Code[20])
@@ -49,13 +42,8 @@ table 50101 Contragent
             Caption = 'Vendor No.';
             TableRelation = Vendor;
             trigger OnValidate()
-            var
-                Contragent: Record Contragent;
             begin
-                Contragent.Reset();
-                Contragent.SetRange(VendorNo, VendorNo);
-                if not Contragent.IsEmpty then
-                    Error(RecordAlreadyExistsErr, TableCaption, Contragent.FieldName(VendorNo), Contragent.VendorNo);
+                CheckRecWithVendExists(VendorNo);
             end;
         }
         field(4; CustomerPostingGroup; Code[20])
@@ -76,9 +64,49 @@ table 50101 Contragent
     }
     var
         RecordAlreadyExistsErr: Label '%1 with %3 %2 already exists';
+        CreateNewConfirmTxt: Label 'Do you want to create a new %1?';
 
     trigger OnInsert()
     begin
         Validate("No.");
+    end;
+
+    procedure AddNewContragentFromCustWithUI(CustNo: Code[20])
+    var
+        Contragent: Record Contragent;
+    begin
+        If not GuiAllowed then
+            exit;
+
+        CheckRecWithCustExists(CustNo);
+        If not Confirm(StrSubstNo(CreateNewConfirmTxt, Contragent.TableCaption), true)
+        then
+            exit;
+
+        Contragent.Init();
+        Contragent.Validate("No.");
+        Contragent.Validate(CustomerNo, CustNo);
+        Contragent.Insert(true);
+
+        Contragent.SetRecFilter();
+        Page.Run(Page::"Contragent Card", Contragent);
+    end;
+
+    local procedure CheckRecWithCustExists(CustNo: Code[20])
+    var
+        Contragent: Record Contragent;
+    begin
+        Contragent.SetRange(CustomerNo, CustNo);
+        if not Contragent.IsEmpty() then
+            Error(RecordAlreadyExistsErr, TableCaption, Contragent.FieldName(CustomerNo), Contragent.CustomerNo);
+    end;
+
+    local procedure CheckRecWithVendExists(VendorNo: Code[20])
+    var
+        Contragent: Record Contragent;
+    begin
+        Contragent.SetRange(VendorNo, VendorNo);
+        if not Contragent.IsEmpty() then
+            Error(RecordAlreadyExistsErr, TableCaption, Contragent.FieldName(VendorNo), Contragent.VendorNo);
     end;
 }

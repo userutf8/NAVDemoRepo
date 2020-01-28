@@ -10,7 +10,7 @@ codeunit 50100 "Contragent Extension Subs"
         Contragent.Reset();
         Contragent.SetRange(CustomerNo, Customer."No.");
         if Contragent.IsEmpty() then
-            Customer.AddNewContragentFromCustWithUI(Customer."No.")
+            Contragent.AddNewContragentFromCustWithUI(Customer."No.")
         else begin
             Contragent.FindFirst();
             Contragent.Validate(CustomerPostingGroup, Customer."Customer Posting Group");
