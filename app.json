@@ -1,0 +1,26 @@
+{
+  "id": "0c2ef79a-cdf8-4729-8901-730fd5c24403",
+  "name": "Sample Extension Contragent",
+  "publisher": "Roman Ivanov",
+  "version": "1.0.0.0",
+  "brief": "Creates record link between Customer and Vendor and stores it in table Contragent",
+  "description": "Creates record link between Customer and Vendor and stores it in table Contragent, updates Customer Posting Group, when new record is created from Customer template",
+  "privacyStatement": "",
+  "EULA": "",
+  "help": "",
+  "url": "",
+  "logo": "",
+  "dependencies": [],
+  "screenshots": [],
+  "platform": "14.0.38155.0",
+  "application": "14.7.0.0",
+  "idRanges": [
+    {
+      "from": 50100,
+      "to": 50149
+    }
+  ],
+  "contextSensitiveHelpUrl": "https://ALProject2.com/help/",
+  "showMyCode": true,
+  "runtime": "3.0"
+}
